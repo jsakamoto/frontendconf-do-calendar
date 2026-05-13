@@ -109,10 +109,9 @@ internal class Agenda
         {
             var icalEvent = new CalendarEvent
             {
-                IsAllDay = false,
                 Uid = session.GetHashForUID(),
-                DtStart = new CalDateTime(session.StartTime) { HasTime = true },
-                DtEnd = new CalDateTime(session.EndTime) { HasTime = true },
+                DtStart = new CalDateTime(session.StartTime),
+                DtEnd = new CalDateTime(session.EndTime),
                 Summary = session.Title,
                 Description = $"<b>Speaker:</b>\r\n{session.Speaker}\r\n\r\n<b>Description:</b>\r\n{session.Description}",
                 Location = session.Location,
@@ -121,6 +120,6 @@ internal class Agenda
         }
 
         var serializer = new CalendarSerializer(new SerializationContext());
-        return serializer.SerializeToString(calendar);
+        return serializer.SerializeToString(calendar) ?? "";
     }
 }
