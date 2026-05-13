@@ -19,6 +19,6 @@ internal class Session
 
     public string GetHashForUID()
     {
-        return new Guid(MD5.HashData(Encoding.UTF8.GetBytes(this.Title ?? ""))).ToString();
+        return new Guid(MD5.HashData(Encoding.UTF8.GetBytes($"{this.Title}|{this.StartTime}|{this.EndTime}|{this.Location}|{this.Speaker}"))).ToString();
     }
 }
