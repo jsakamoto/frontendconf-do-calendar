@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="FrontEndConfDoCalendar.Test/FrontendConfDoCalendar.Test.csproj" />
+  <Project Path="FrontEndConfDoCalendar/FrontendConfDoCalendar.csproj" />
+</Solution>
