@@ -7,7 +7,10 @@ builder.Services.AddHttpClient();
 builder.Services.AddTransient<Agenda>();
 builder.Services.AddCors();
 builder.Services.AddOutputCache();
-builder.Services.AddApplicationInsightsTelemetry();
+if (!builder.Environment.IsDevelopment())
+{
+    builder.Services.AddApplicationInsightsTelemetry();
+}
 
 var app = builder.Build();
 
