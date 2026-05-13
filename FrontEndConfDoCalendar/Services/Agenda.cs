@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Text.RegularExpressions;
 using AngleSharp.Html.Parser;
 using FrontendConfDoCalendar.Models;
 using Ical.Net.CalendarComponents;
@@ -24,21 +25,33 @@ internal class Agenda
         sessionList.AddRange([
             new() {
                 Title = "オープニング",
-                StartTime = ParseDateTime("2024/08/24 10:00"),
-                EndTime = ParseDateTime("2024/08/24 10:20"),
-                Location = "カケハシ"
+                StartTime = ParseDateTime("2026/06/06 10:40"),
+                EndTime = ParseDateTime("2026/06/06 11:00"),
+                Location = "カケハシルーム"
             },
             new() {
-                Title = "クロージング",
-                StartTime = ParseDateTime("2024/08/24 18:35"),
-                EndTime = ParseDateTime("2024/08/24 18:50"),
-                Location = "カケハシ"
+                Title = "エンディング",
+                StartTime = ParseDateTime("2026/06/06 18:25"),
+                EndTime = ParseDateTime("2026/06/06 18:45"),
+                Location = "カケハシルーム"
             },
             new() {
-                Title = "懇親会",
-                StartTime = ParseDateTime("2024/08/24 19:15"),
-                EndTime = ParseDateTime("2024/08/24 21:15"),
-                Location = "LINEヤフー WOWルーム"
+                Title = "Ask the speaker",
+                StartTime = ParseDateTime("2026/06/06 12:30"),
+                EndTime = ParseDateTime("2026/06/06 12:45"),
+                Location = "スポンサールーム"
+            },
+            new() {
+                Title = "Ask the speaker",
+                StartTime = ParseDateTime("2026/06/06 15:20"),
+                EndTime = ParseDateTime("2026/06/06 15:35"),
+                Location = "スポンサールーム"
+            },
+            new() {
+                Title = "Ask the speaker",
+                StartTime = ParseDateTime("2026/06/06 16:50"),
+                EndTime = ParseDateTime("2026/06/06 17:05"),
+                Location = "スポンサールーム"
             }
         ]);
 
@@ -47,7 +60,7 @@ internal class Agenda
         var parser = new HtmlParser();
 
         // Fetch the time table page
-        var timetablePage = await httpClient.GetStringAsync("https://fortee.jp/frontend-conf-hokkaido-2024/timetable");
+        var timetablePage = await httpClient.GetStringAsync("https://fortee.jp/frontend-phpcon-do-2026/timetable");
         var timetableDoc = await parser.ParseDocumentAsync(timetablePage);
 
         // Traverse each session detail page
@@ -55,7 +68,7 @@ internal class Agenda
         foreach (var link in linksToSession)
         {
             // Fetch the session detail page
-            await Task.Delay(10);
+            await Task.Delay(20);
             var sessionUrl = link.GetAttribute("href");
             var sessionPage = await httpClient.GetStringAsync(authority + sessionUrl);
             var sessionDoc = await parser.ParseDocumentAsync(sessionPage);
@@ -67,15 +80,11 @@ internal class Agenda
             var sessionInfoBlock = titleElement.ParentElement?.QuerySelector(".type");
             var location = sessionInfoBlock?.QuerySelector(".track")?.TextContent.Trim() ?? "";
             var startTime = ParseDateTime(sessionInfoBlock?.QuerySelector(".schedule")?.TextContent.Trim().TrimEnd('〜'));
-            var durationtext = sessionInfoBlock?.QuerySelector(".name")?.TextContent;
-            var duration = sessionInfoBlock?.QuerySelector(".name")?.TextContent switch
-            {
-                "レギュラートーク(20分)" => 20,
-                "スポンサートーク(10分)" => 10,
-                "スポンサーLT(5分)" => 5,
-                "LT(5分)" => 5,
-                _ => 0
-            };
+
+            var durationText = sessionInfoBlock?.QuerySelector(".name")?.TextContent;
+            var match = Regex.Match(durationText ?? "", @"(?<min>\d+)分");
+            var duration = match.Success ? int.Parse(match.Groups["min"].Value) : 0;
+
             var endTime = startTime.AddMinutes(duration);
 
             var speakerBlock = titleElement.ParentElement?.QuerySelector(".speaker");
@@ -103,8 +112,8 @@ internal class Agenda
     {
         var sessionList = await this.GetSessionsAsync();
         var calendar = new Ical.Net.Calendar();
-        calendar.AddProperty("X-WR-CALNAME", "Frontend Conference HOKKAIDO");
-        calendar.AddProperty("X-WR-CALDESC", "フロントエンドカンファレンス北海道");
+        calendar.AddProperty("X-WR-CALNAME", "Frontend and PHP Conference Hokkaido");
+        calendar.AddProperty("X-WR-CALDESC", "フロントエンド・PHP カンファレンス北海道");
         foreach (var session in sessionList)
         {
             var icalEvent = new CalendarEvent
